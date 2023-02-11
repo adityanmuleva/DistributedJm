@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jmeter-helm.fullname" . }}-jmeter-master
+  labels:
+    {{- include "jmeter-helm.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.masterreplica }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "jmeter-helm.fullname" . }}-jmeter-master
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ include "jmeter-helm.fullname" . }}-jmeter-master
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.masterport }}
+          name: jmeter-api
+          protocol: TCP
