@@ -9,7 +9,7 @@ image:
   repository: aadityamuleva/jmeter-flask
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.0.0.0"
+  tag: "3.0.0.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -31,9 +31,9 @@ podSecurityContext: {}
 
 service:
   type: ClusterIP
-  port1: 60000
+  port1: 5000
   port2: 1099
-  masterport: 8080
+  masterport: 6000
 
 ingress:
   enabled: false
@@ -45,7 +45,7 @@ ingress:
     - host: chart-example.local
       paths:
         - path: /
-          pathType: ImplementationSpecific
+          pathType: Prefix
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
