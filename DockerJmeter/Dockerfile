@@ -1,14 +1,11 @@
-# Importing alpine image from docker hub
+# Start from the Alpine image
 FROM alpine:3.12
-
-WORKDIR /Jmeter
-#Defining paths to variables
+# Download and install Apache JMeter
 ARG JMETER_VERSION="5.3"
 ENV JMETER_HOME /opt/apache-jmeter-${JMETER_VERSION}
 ENV	JMETER_BIN	${JMETER_HOME}/bin
 # Downloading Jmeter
 ENV	JMETER_DOWNLOAD_URL  https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz
-
 # Adding pre-requisite certificates
 ARG TZ="Europe/Amsterdam"
 ENV TZ ${TZ}
@@ -24,26 +21,19 @@ RUN    apk update \
 	&& mkdir -p /opt  \
 	&& tar -xzf /tmp/dependencies/apache-jmeter-${JMETER_VERSION}.tgz -C /opt  \
 	&& rm -rf /tmp/dependencies
-
 #Setting jmeter path and working directories
 ENV PATH $PATH:$JMETER_BIN
 WORKDIR ${JMETER_HOME}/bin
-
-#Create a /jmx/ folder in current path and keep jmx files inside it
-COPY ./jmx/ .
-
-# Command to run jmeter jmx file in CLI mode
-# ENTRYPOINT ["jmeter", "-n", "-t", "light_thread.jmx",  "-l",  "./run_results/test_result.jtl"]
-
-#To get results use below command
-#docker run --mount type=bind,source="<host absolute path>",target="/opt/apache-jmeter-5.3/bin/run_results" <Image_id>
-#Example #docker run --mount type=bind,source="/home/hcm/Aaditya/containerization/DockerJmeter/results/",target="/opt/apache-jmeter-5.3/bin/run_results" 2be1c078ca0d
-
-
-FROM python:3.8
-WORKDIR /FlaskApp
-COPY requirements.txt requirements.txt
+# Install Python and pip
+RUN apk add python3 && \
+    apk add py3-pip	
+# Set the working directory
+WORKDIR /app
+# Copy the files from the host to the container
+COPY . /app
+# Set the environment variables for Apache JMeter
+ENV JMETER_HOME /opt/jmeter
+ENV PATH $JMETER_HOME/bin:$PATH
+# Set the default command to run in the container
 RUN pip3 install -r requirements.txt
-COPY . .
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
- 

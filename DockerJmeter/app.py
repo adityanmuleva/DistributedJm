@@ -1,17 +1,28 @@
 from flask import Flask, request
 import requests
 import subprocess
+import os 
 
 app = Flask(__name__)
     
 
-@app.route("/run_jmeter", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def run_jmeter():
+    current_workingdir = os.getcwd()
+    print("Working dir = ", current_workingdir)
     if request.method == "GET":
-        command = "jmeter -n -t jmx/light_thread.jmx -l ./run_results/test_result.jtl"
+        command = "jmeter -n -t {}/jmx/light_thread.jmx -l {}/run_results/test_result.jtl".format(current_workingdir, current_workingdir)
         status = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
         if status:
-            return "Request received"
+            print(status.stdout)
+            return "GET Request recieved"
+        else:
+            return "Command didnt work"
+    elif request.method == "POST":
+        command = "jmeter -n -t {}/jmx/light_thread.jmx -l {}/run_results/test_result.jtl".format(current_workingdir, current_workingdir)
+        status = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
+        if status:
+            return "POST Request received"
         else:
             return "Command didnt work"
 
